@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>🗳️ DApp de Vote </title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    header {
+      background: #0052cc;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    section {
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-bottom: 12px;
+      font-size: 1.25rem;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 8px;
+      color: #0052cc;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      color: white;
+      background-color: #0052cc;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #003d99;
+    }
+    .result, .status, .proposals {
+      margin-top: 20px;
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <header>🗳️ DApp de Vote</header>
+  <main>
+    <section id="step-register">
+      <h2>1. Soumettre une proposition</h2>
+      <input id="proposal" type="text" placeholder="Description de la proposition" />
+      <button onclick="registerProposal()">Soumettre proposition</button>
+      <div class="status" id="status"></div>
+    </section>
+
+    <section id="step-vote">
+      <h2>2. Voter</h2>
+      <input id="voteId" type="number" placeholder="ID de la proposition" />
+      <button onclick="vote()">Voter</button>
+      <div class="status" id="vote-status"></div>
+    </section>
+
+    <section id="step-result">
+      <h2>3. Résultats</h2>
+      <button onclick="getWinner()">Voir le gagnant</button>
+      <div class="result" id="winner"></div>
+      <button onclick="getAllProposals()">Voir toutes les propositions</button>
+      <div class="proposals" id="proposals"></div>
+    </section>
+  </main>
+
+  <script>
+    const CONTRACT_ADDRESS = "0xC01472ad04BF859756aD3F5FB66e6F7269801F97";
+    const ABI = [{"inputs":[],"name":"endProposalsRegistration","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"endVotingSession","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[],"name":"proceedToNextStep","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"proposalId","type":"uint256"}],"name":"ProposalRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"proposalId","type":"uint256"}],"name":"ProposalVetoed","type":"event"},{"inputs":[{"internalType":"string","name":"_description","type":"string"}],"name":"registerProposal","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_voter","type":"address"}],"name":"registerVoter","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_durationInSeconds","type":"uint256"}],"name":"setWorkflowDeadline","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"startProposalsRegistration","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"startVotingSession","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"tallyVotes","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_proposalId","type":"uint256"}],"name":"vetoProposal","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_proposalId","type":"uint256"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"voter","type":"address"},{"indexed":false,"internalType":"uint256","name":"proposalId","type":"uint256"}],"name":"Voted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"voterAddress","type":"address"}],"name":"VoterRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"enum Voting.WorkflowStatus","name":"previousStatus","type":"uint8"},{"indexed":false,"internalType":"enum Voting.WorkflowStatus","name":"newStatus","type":"uint8"}],"name":"WorkflowStatusChange","type":"event"},{"inputs":[],"name":"getWinner","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"proposals","outputs":[{"internalType":"string","name":"description","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"vetoedProposals","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"voters","outputs":[{"internalType":"bool","name":"isRegistered","type":"bool"},{"internalType":"bool","name":"hasVoted","type":"bool"},{"internalType":"uint256","name":"votedProposalId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"winningProposalId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"workflowDeadline","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"workflowStatus","outputs":[{"internalType":"enum Voting.WorkflowStatus","name":"","type":"uint8"}],"stateMutability":"view","type":"function"}];
+
+
+    async function connect() {
+      if (!window.ethereum) throw new Error("Installe MetaMask");
+      await ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      return new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+    }
+
+    async function registerProposal() {
+      const status = document.getElementById("status");
+      status.textContent = "📤 Envoi...";
+      try {
+        const contract = await connect();
+        const tx = await contract.registerProposal(document.getElementById("proposal").value);
+        await tx.wait();
+        status.textContent = "✅ Proposition enregistrée";
+      } catch (e) {
+        console.error(e);
+        status.textContent = "❌ Erreur lors de l'enregistrement";
+      }
+    }
+
+    async function vote() {
+      const status = document.getElementById("vote-status");
+      status.textContent = "📤 Envoi du vote...";
+      try {
+        const contract = await connect();
+        const tx = await contract.vote(Number(document.getElementById("voteId").value));
+        await tx.wait();
+        status.textContent = "✅ Vote enregistré";
+      } catch (e) {
+        console.error(e);
+        status.textContent = "❌ Erreur lors du vote";
+      }
+    }
+
+    async function getWinner() {
+      const box = document.getElementById("winner");
+      box.textContent = "⏳ Chargement...";
+      try {
+        const contract = await connect();
+        const winner = await contract.getWinner();
+        box.textContent = `🏆 ${winner}`;
+      } catch (e) {
+        console.error(e);
+        box.textContent = "❌ Impossible de récupérer le gagnant";
+      }
+    }
+
+    async function getAllProposals() {
+      const container = document.getElementById("proposals");
+      container.innerHTML = "⏳ Chargement...";
+      try {
+        const contract = await connect();
+        let html = "<ul>";
+        for (let i = 0;; i++) {
+          try {
+            const p = await contract.proposals(i);
+            html += `<li><strong>ID ${i}:</strong> ${p.description} - ${p.voteCount} votes</li>`;
+          } catch {
+            break;
+          }
+        }
+        html += "</ul>";
+        container.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        container.textContent = "❌ Impossible de récupérer les propositions";
+      }
+    }
+  </script>
+</body>
+</html>
