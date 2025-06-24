@@ -1,0 +1,8 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "pragma-solidity": "off",
+    "quotes": ["error", "double"],
+    "indent": ["error", 4]
+  }
+} 

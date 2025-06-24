@@ -1,0 +1,8 @@
+{
+  "solidity.defaultCompiler": "hardhat",
+  "solidity.compileUsingRemoteVersion": "v0.8.0",
+  "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
+  "solidity.enabledAsYouTypeCompilationErrorCheck": true,
+  "solidity.validationDelay": 1500
+} 

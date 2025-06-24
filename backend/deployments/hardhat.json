@@ -1,0 +1,25 @@
+{
+  "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "network": "hardhat",
+  "deployedAt": "2025-06-24T18:36:26.519Z",
+  "abi": [
+    "function registerVoter(address _voter) external",
+    "function startProposalsRegistration() external",
+    "function registerProposal(string calldata _description) external",
+    "function endProposalsRegistration() external",
+    "function startVotingSession() external",
+    "function vote(uint _proposalId) external",
+    "function endVotingSession() external",
+    "function tallyVotes() external",
+    "function getWinner() external view returns (string memory)",
+    "function workflowStatus() external view returns (uint8)",
+    "function voters(address) external view returns (bool isRegistered, bool hasVoted, uint votedProposalId)",
+    "function proposals(uint) external view returns (string memory description, uint voteCount)",
+    "function winningProposalId() external view returns (uint)",
+    "function owner() external view returns (address)",
+    "event VoterRegistered(address voterAddress)",
+    "event WorkflowStatusChange(uint8 previousStatus, uint8 newStatus)",
+    "event ProposalRegistered(uint proposalId)",
+    "event Voted(address voter, uint proposalId)"
+  ]
+}

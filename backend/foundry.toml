@@ -1,0 +1,7 @@
+[profile.default]
+src = "contracts"
+out = "artifacts"
+libs = ["node_modules"]
+remappings = [
+    "@openzeppelin/=node_modules/@openzeppelin/"
+] 
